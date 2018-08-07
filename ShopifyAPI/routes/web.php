@@ -16,3 +16,4 @@ Route::get('/', function () {
 });
 
 Route::get('/create-webhook-for-customers-create', 'ShopifyController@createWebhookForCustomersCreate');
+//Route::get('/test', 'TestController@test');
