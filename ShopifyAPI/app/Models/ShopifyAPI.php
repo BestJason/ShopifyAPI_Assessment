@@ -11,9 +11,6 @@ class ShopifyAPI extends Model
   // webhook path of Shopify Api
   const WEBHOOK_PATH = '/admin/webhooks.json';
 
-  // The webhooks ready to create
-  protected $webhooks;
-
   // The Api Key
   protected $apiKey;
 
@@ -46,8 +43,6 @@ class ShopifyAPI extends Model
   {
     try{
 
-      $this->webhooks = setWebhooks(config('shopify-app.webhooks'));
-
       $this->setApiKey(config('shopify-app.api_key'));
       if (empty($this->apiKey)) {
         throw new \Exception("API Key is missing");
@@ -78,7 +73,7 @@ class ShopifyAPI extends Model
   public function initializeApi()
   {
     $api = new BasicApi(true);
-    $api->setShop($this->shop);
+    $api->setShop($this->apiDomain);
     $api->setApiKey($this->apiKey);
     $api->setApiPassword($this->apiPassword);
     $this->api = $api;
@@ -114,16 +109,6 @@ class ShopifyAPI extends Model
     $this->apiPassword = $password;
   }
 
-  /**
-   * Set Webhooks.
-   *
-   * @return void
-   */
-  public function setWebhooks(array $webhooks)
-  {
-    $this->webhooks = $webhooks;
-  }
-  
   /**
    * Identify if the webhook is existing.
    *
@@ -180,13 +165,10 @@ class ShopifyAPI extends Model
       )->body->webhooks;
 
       // Identify if the webhook is existing
-      foreach($this->webhooks as $webhook) {
-        if (!$this->webhookExists($shopWebhooks, $webhook)) {
-          $this->api->rest('POST', self::WEBHOOK_PATH, ['webhook' => $webhook]);
-          $created[] = $webhook;
-        }
+      if (!$this->webhookExists($shopWebhooks, $webhook)) {
+        $this->api->rest('POST', self::WEBHOOK_PATH, ['webhook' => $webhook]);
       }
-      return $created;
+      return $webhook;
     } catch(\Exception $e) {
       
       abort('400', $e->getMessage());
