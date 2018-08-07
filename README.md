@@ -2,24 +2,31 @@
 
 ### Controllers
 > ShopifyAPI/app/Http/Controllers/ShopifyController.php 
+
 `For creating webhook of customers creatation`
 
 ### Models
 > ShopifyAPI/app/Models/MailChimpAPI.php 
+
 `The API Model of MailChimp`
+
 > ShopifyAPI/app/Models/ShopifyAPI.php 
+
 `The API Model of Shopify App`
 
 ### Jobs
 > ShopifyAPI/app/Jobs/CustomersCreateJob.php 
+
 `For handling webhook request after creating customers on shopify app`
 
 ### Commands
 > ShopifyAPI/app/Console/Commands/UpdateMembersToMailChimp.php 
+
 `For daily updating MailChimp Members' detailed information`
 
 ### Cron Job File
 > ShopifyAPI/cronJob is the cron job sample
+
 `For daily running UpdateMembersToMailChimp command`
 
 We should run the following command to set up a cron job
