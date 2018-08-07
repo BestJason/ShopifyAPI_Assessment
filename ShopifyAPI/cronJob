@@ -1,0 +1,2 @@
+# update members' information of MailChimp on 02:00:00 of every day, the result of running will record into log file of laravel
+00 02 * * * /usr/bin/php /Users/JasonLee/Repository/ShopifyAPI_Assessment/ShopifyAPI/artisan command:UpdateMembersToMailChimp > /dev/null 
