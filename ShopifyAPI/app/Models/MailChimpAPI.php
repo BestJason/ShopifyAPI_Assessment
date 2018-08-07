@@ -30,6 +30,23 @@ class MailChimpAPI extends Model
     'addresses'
   ];
 
+  // the fields' Tag Name definition
+  const MERGE_FIELDS_TAG_MAPPING = [
+    'last_name' => 'LNAME',
+    'first_name' => 'FNAME',
+    'accepts_marketing' => 'AMARKETING',
+    'orders_count' => 'OCOUNT',
+    'total_spent' => 'TSPENT',
+    'last_order_id' => 'OID',
+    'last_order_name' => 'ONAME',
+    'note' => 'NOTE',
+    'state' => 'STATE',
+    'verified_email' => 'VEMAIL',
+    'tags' => 'TAGS',
+    'phone' => 'PHONE',
+    'addresses' => 'ADDRESSES',
+  ];
+
   // MailChimp API Object
   protected $mailChimp;
 
@@ -161,12 +178,12 @@ class MailChimpAPI extends Model
         $type = 'phone';
       }
       if ($field == 'addresses') {
-        $type = 'address';
+        $type = 'text';
       }
       $mFields = [
         'name' => $field,
         'type' => $type,
-        'tag' => substr(strtoupper($field), 0, 10),
+        'tag' => self::MERGE_FIELDS_TAG_MAPPING[$field],
       ];
       if ($result = $this->createMergeFields($mFields)) {
         if ($field == 'addresses') {
@@ -175,7 +192,9 @@ class MailChimpAPI extends Model
         if ($field == 'accepts_marketing' || $field == 'verified_email') {
           $data[$field] = intval($data[$field]);
         }
-        $fields[$result['tag']] = $data[$field];
+        if (!empty($result['tag']) && !empty($data[$field])) {
+          $fields[$result['tag']] = $data[$field];
+        }
       }
     }
     return $fields;
@@ -201,7 +220,11 @@ class MailChimpAPI extends Model
       $mFields = $this->mappingFields($data);
       Log::info("Subscribing.... :". json_encode($mFields));
       $result = Newsletter::subscribeOrUpdate($data['email'], $mFields);
-      Log::info("Subscribe Result : ". json_encode($result));
+      $reason = "Success";
+      if (!$result) {
+        $reason = Newsletter::getLastError();
+      }
+      Log::info("Subscribe Result : ". $reason);
       return $result;
     } catch(\Exception $e) {
       Log::info("Subscribing.... : ". $e->getMessage());
