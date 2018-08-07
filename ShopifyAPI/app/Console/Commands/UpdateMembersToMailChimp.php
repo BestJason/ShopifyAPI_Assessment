@@ -40,22 +40,28 @@ class UpdateMembersToMailChimp extends Command
      */
     public function handle()
     {
+      // count the number of success and failure
+      $success = 0;
+      $failure = 0;
       // get Members from Shopify
       $shopify = new ShopifyAPI();
       $customers = $shopify->getCustomers();
       // loop members and sync to MailChimp and update the latest profile into MailChimp
       if (!empty($customers)) {
-        array_map(function($customer){
+        array_map(function($customer) use(&$success, &$failure){
           $mailChimp = new MailChimpAPI();
           if (!empty($customer) && is_array($customer)) {
             Log::info('Sync '. $customer['email'].' start ... : ');
             if($mailChimp->subscribeOrUpdate($customer)) { 
               Log::info('Sync '. $customer['email']. ' Successfully!');
+              $success++;
             } else {
               Log::info('Sync '. $customer['email']. ' Failed!');
+              $failure++;
             }
           }
         }, $customers);
       }
+      Log::info('Completed! Success: '. $success. ' ; Failure: '. $failure. ' ;');
     }
 }
