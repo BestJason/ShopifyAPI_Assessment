@@ -6,6 +6,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Facades\Log;
+use App\Models\MailChimpAPI;
 
 class CustomersCreateJob implements ShouldQueue
 {
@@ -47,9 +48,21 @@ class CustomersCreateJob implements ShouldQueue
     public function handle()
     {
       // Monitor the notification infomation
-      Log::info('Notification came.'. $this->shopDomain. ':' .json_encode($this->data));
+      Log::info('Notification start and prepare for syncing the MailChimp.'. $this->shopDomain. ':' .json_encode($this->data));
 
-      // update members of mailchimp
+      try {
+        // update members of mailchimp
+        $mailChimpApi = new MailChimpAPI();
+        $result = $mailChimpApi->subscribeOrUpdate(json_decode(json_encode($this->data), true));
+        if (!$result) {
+          throw new \Exception('Subscribing Failed!');
+        }
+      } catch(\Exception $e) {
+        Log::info('Notification suffered something wrong.... : '. $e->getMessage());
+        // ToDo write this task into Redis or MQ
+        //
+      }
+      Log::info('Notification done!');
 
     }
 }
