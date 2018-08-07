@@ -11,6 +11,9 @@ class ShopifyAPI extends Model
   // webhook path of Shopify Api
   const WEBHOOK_PATH = '/admin/webhooks.json';
 
+  // customer path of Shopify Api
+  const CUSTOMERS_PATH = '/admin/customers.json';
+
   // The Api Key
   protected $apiKey;
 
@@ -176,6 +179,29 @@ class ShopifyAPI extends Model
     }
   }
 
+  /**
+   * Getting Customers From Shopify.
+   *
+   * @return array
+   */
+  public function getCustomers()
+  {
+    try {
+      $response = $this->api->rest(
+        'GET',
+        self::CUSTOMERS_PATH
+      );
+      if (!empty($response) && $response->response->getstatusCode() == 200) {
+        $customers = $response->body->customers;
+        if (!empty($customers)) {
+          $customers = json_decode(json_encode($customers), true);
+        }
+      }
+      return $customers;
+    } catch(\Exception $e) {
+      return [];
+    }
+  }
 
 
 }
